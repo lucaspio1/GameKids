@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -24,7 +24,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pio.gamekids.viewmodel.CameraViewModel
 
 @Composable
-fun CameraScreen(viewModel: CameraViewModel = viewModel()) {
+fun CameraScreen(
+    criancaId: String,
+    taskId: String,
+    onNavigateBack: () -> Unit,
+    viewModel: CameraViewModel = viewModel()
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val imageCapture = remember { ImageCapture.Builder().build() }
@@ -43,10 +48,24 @@ fun CameraScreen(viewModel: CameraViewModel = viewModel()) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(factory = { cameraPreviewView }, modifier = Modifier.fillMaxSize())
+
         Button(
-            onClick = { viewModel.capturarFoto(context, imageCapture, ContextCompat.getMainExecutor(context)) },
+            onClick = {
+                viewModel.capturarFoto(
+                    context = context,
+                    imageCapture = imageCapture,
+                    executor = ContextCompat.getMainExecutor(context),
+                    criancaId = criancaId, // <-- Parâmetro que estava causando o erro
+                    taskId = taskId,
+                    onSuccess = { onNavigateBack() }
+                )
+            },
             shape = CircleShape,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp).size(70.dp).border(4.dp, Color.White, CircleShape),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 48.dp)
+                .size(80.dp)
+                .border(4.dp, Color.White, CircleShape),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
         ) {}
     }
